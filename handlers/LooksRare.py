@@ -12,6 +12,6 @@ class LooksRare:
 
     def main(self):
         LooksRare = self.w3.eth.contract(address=self.exchange_contract, abi=self.contract_abi)
-        # Test 3
+        # Test 4
 
 
