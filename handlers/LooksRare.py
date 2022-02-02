@@ -11,7 +11,7 @@ class LooksRare:
         self.w3 = Web3(Web3.HTTPProvider(os.getenv('WEB3_PROVIDER_HTTP')))
 
     def main(self):
-        LooksRare = w3.eth.contract(address=self.exchange_contract, abi=self.contract_abi)
+        LooksRare = self.w3.eth.contract(address=self.exchange_contract, abi=self.contract_abi)
 
 
 
