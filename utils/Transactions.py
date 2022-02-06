@@ -1,15 +1,16 @@
+from dotenv import load_dotenv
 from web3 import Web3
+import os
 
 # TODO: better gas price / base fee estimation
 
 
 class Transactions:
-    def __init__(self, provider, private_key, public_address):
-        self.web3_provider = provider
+    def __init__(self, private_key, public_address):
+        load_dotenv()
         self.private_key = private_key
         self.public_address = public_address
-        # self.w3 = Web3(Web3.WebsocketProvider(self.web3_provider))
-        self.w3 = Web3(Web3.HTTPProvider(self.web3_provider))
+        self.w3 = Web3(Web3.HTTPProvider(os.getenv('WEB3_PROVIDER_HTTP')))
 
     def sendTx_legacy(self, to, amount, data=''):
         nonce = self.w3.eth.get_transaction_count(self.public_address)
