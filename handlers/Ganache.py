@@ -1,5 +1,8 @@
 import platform
 import subprocess
+import os
+
+# TODO: find way to stop a CLI process started from Python
 
 # print(system)
 # print(release)
@@ -13,6 +16,7 @@ class Ganache:
     def __init__(self):
         self.system = platform.system()
         self.release = platform.release()
+        self.processes = []
 
         # Installs Ganache if not installed (uses npm or Yarn)
         if not self.check_ganache():
@@ -65,9 +69,22 @@ class Ganache:
             raise Exception('Cannot install Ganache-CLI.')
 
     def fork_mainnet(self):
+        result = subprocess.run('ganache-cli --fork http://localhost:8545 --port 8555', shell=True, text=True)
+        self.processes.append(result)
         # ganache-cli --fork http://localhost:8545 --port 8555
-        pass
+        # Kill subprocess: os.killpg(os.getpgid(pro.pid))
 
+        # Also possible on hardhat with:
+            # npx hardhat node --fork http://localhost:8545 --fork-block-number 11095000 --port 8555
 
-# ganache = Ganache()
+    def kill_latest_process(self):
+        p = self.processes[-1]
+        p.terminate()
+        p.wait()
+
+    def kill_all_process(self):
+        for p in self.processes:
+            p.terminate()
+            p.wait()
+
 
