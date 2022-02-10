@@ -28,6 +28,3 @@ class Opensea:
             current_price = 'Not Listed'
 
         return current_price
-
-os = Opensea()
-print(os.get_asset_price('0xed5af388653567af2f388e6224dc7c4b3241c544', '9660'))
