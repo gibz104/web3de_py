@@ -10,8 +10,13 @@ class UniswapV2:
     load_dotenv()
     endpoint = os.getenv('WEB3_PROVIDER_GRAPHQL')
 
-    @timer
     def get_reserves(self):
+        rawReserves = self.get_raw_reserves()
+        parsedReserves = self.parse_reserves(rawReserves)
+        return parsedReserves
+
+    @timer
+    def get_raw_reserves(self):
         # Returns pool reserves as of latest block
         query = """
         {
@@ -50,6 +55,5 @@ class UniswapV2:
 
 uni = UniswapV2()
 data = uni.get_reserves()
-parsed_data = uni.parse_reserves(data)
-print(parsed_data)
-
+print(data)
+print(f"ETHBTC Price: {(data['reserve1'] * 10 ** 18) / (data['reserve0'] * 10 ** 8)}")
