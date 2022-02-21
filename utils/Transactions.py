@@ -3,7 +3,7 @@ from web3 import Web3
 import os
 
 # TODO: better gas price / base fee estimation
-
+# TODO: send transaction using GraphQL mutation (geth endpoint)
 
 class Transactions:
     def __init__(self, private_key, public_address):
