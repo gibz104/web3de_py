@@ -11,13 +11,13 @@ class ERC20Handler:
     endpoint = os.getenv('WEB3_PROVIDER_GRAPHQL')
 
     @timer
-    def get_decimals_gql(self):
+    def get_decimals(self, contract_addr):
         query = """
-        {
+        query getDecimals($addr: Address!) {
           block {
             number
             call(data: {
-              to: "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599"
+              to: $addr
               data: "0x313ce567"  # Web3.keccak(text='decimals()')
             }) {
               data
@@ -28,13 +28,8 @@ class ERC20Handler:
         }
         """
 
-        resp = requests.post(self.endpoint, json={'query': query})
+        variables = {'addr': contract_addr}
+        resp = requests.post(self.endpoint, json={'query': query, 'variables': variables})
         json_data = json.loads(resp.text)
-        print(json_data)
         reserves = json_data['data']['block']['call']['data']
         return Web3.toInt(hexstr=reserves)
-
-
-erc20 = ERC20Handler()
-print(erc20.get_decimals_gql())
-

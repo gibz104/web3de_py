@@ -1,41 +1,45 @@
-from utils.Decorators import timer, timer_ns
+from utils.Decorators import timer
 from dotenv import load_dotenv
 from web3 import Web3
 import requests
 import json
 import os
 
+# TODO: Use graphql fragments(?) to make reserve queries dynamic (can look up multiple pools in one call)
+
 
 class UniswapV2:
     load_dotenv()
     endpoint = os.getenv('WEB3_PROVIDER_GRAPHQL')
 
-    def get_reserves(self):
-        rawReserves = self.get_raw_reserves()
+    def get_reserves(self, pool_addr):
+        rawReserves = self.get_raw_reserves(pool_addr)
         parsedReserves = self.parse_reserves(rawReserves)
         return parsedReserves
 
     @timer
-    def get_raw_reserves(self):
+    def get_raw_reserves(self, pool_addr):
         # Returns pool reserves as of latest block
         query = """
-        {
+        query getReserves($addr: Address!) {
           block {
             number
-            pool: account(address: "0xBb2b8038a1640196FbE3e38816F3e67Cba72D940") {
+            pool: account(address: $addr) {
               reserve: storage(slot: "0x0000000000000000000000000000000000000000000000000000000000000008")
             }
           }
         }
         """
-
-        resp = requests.post(self.endpoint, json={'query': query})
+        variables = {'addr': pool_addr}
+        resp = requests.post(self.endpoint, json={'query': query, 'variables': variables})
         json_data = json.loads(resp.text)
         reserves = json_data['data']['block']['pool']['reserve']
         return reserves
 
-    @timer_ns
     def parse_reserves(self, reserves: str):
+        if reserves is None:
+            return None
+
         reserves = reserves.replace('0x', '')
 
         timestampRaw = reserves[0:8]
@@ -48,12 +52,6 @@ class UniswapV2:
 
         return {
             'timestamp': timestamp,
-            'reserve0' : reserve0,
-            'reserve1' : reserve1
+            'reserve0': reserve0,
+            'reserve1': reserve1
         }
-
-
-uni = UniswapV2()
-data = uni.get_reserves()
-print(data)
-print(f"ETHBTC Price: {(data['reserve1'] * 10 ** 18) / (data['reserve0'] * 10 ** 8)}")
