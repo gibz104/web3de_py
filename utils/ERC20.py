@@ -10,7 +10,6 @@ class ERC20Handler:
     load_dotenv()
     endpoint = os.getenv('WEB3_PROVIDER_GRAPHQL')
 
-    @timer
     def get_decimals(self, contract_addr):
         query = """
         query getDecimals($addr: Address!) {
@@ -18,7 +17,7 @@ class ERC20Handler:
             number
             call(data: {
               to: $addr
-              data: "0x313ce567"  # Web3.keccak(text='decimals()')
+              data: "0x313ce567"  # Web3.keccak(text='decimals()')[:4]
             }) {
               data
               gasUsed
@@ -31,5 +30,53 @@ class ERC20Handler:
         variables = {'addr': contract_addr}
         resp = requests.post(self.endpoint, json={'query': query, 'variables': variables})
         json_data = json.loads(resp.text)
-        reserves = json_data['data']['block']['call']['data']
-        return Web3.toInt(hexstr=reserves)
+        decimals = json_data['data']['block']['call']['data']
+        return Web3.toInt(hexstr=decimals)
+
+    def get_symbol(self, contract_addr):
+        query = """
+        query getDecimals($addr: Address!) {
+          block {
+            number
+            call(data: {
+              to: $addr
+              data: "0x95d89b41"  # Web3.keccak(text='symbol()')[:4]
+            }) {
+              data
+              gasUsed
+              status
+            }
+          }
+        }
+        """
+
+        variables = {'addr': contract_addr}
+        resp = requests.post(self.endpoint, json={'query': query, 'variables': variables})
+        json_data = json.loads(resp.text)
+        symbol = json_data['data']['block']['call']['data']
+        symbol = '0x' + symbol[:64]
+        return Web3.toText(hexstr=symbol)
+
+    def get_name(self, contract_addr):
+        query = """
+        query getDecimals($addr: Address!) {
+          block {
+            number
+            call(data: {
+              to: $addr
+              data: "0x06fdde03"  # Web3.keccak(text='symbol()')[:4]
+            }) {
+              data
+              gasUsed
+              status
+            }
+          }
+        }
+        """
+
+        variables = {'addr': contract_addr}
+        resp = requests.post(self.endpoint, json={'query': query, 'variables': variables})
+        json_data = json.loads(resp.text)
+        name = json_data['data']['block']['call']['data']
+        name = '0x' + name[-64:]
+        return Web3.toText(hexstr=name)
