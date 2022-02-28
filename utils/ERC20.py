@@ -54,7 +54,9 @@ class ERC20Handler:
         resp = requests.post(self.endpoint, json={'query': query, 'variables': variables})
         json_data = json.loads(resp.text)
         symbol = json_data['data']['block']['call']['data']
-        symbol = '0x' + symbol[:64]
+        print(symbol)
+        symbol = '0x' + symbol[-64:]
+        print(symbol)
         return Web3.toText(hexstr=symbol)
 
     def get_name(self, contract_addr):
